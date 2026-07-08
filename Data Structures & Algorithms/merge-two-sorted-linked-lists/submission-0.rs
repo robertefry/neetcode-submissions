@@ -1,0 +1,74 @@
+// Definition for singly-linked list.
+// #[derive(PartialEq, Eq, Clone, Debug)]
+// pub struct ListNode {
+//     pub val: i32,
+//     pub next: Option<Box<ListNode>>,
+// }
+//
+// impl ListNode {
+//     #[inline]
+//     pub fn new(val: i32) -> Self {
+//         ListNode { next: None, val }
+//     }
+// }
+
+impl Solution {
+    pub fn merge_two_lists(
+        list1: Option<Box<ListNode>>,
+        list2: Option<Box<ListNode>>,
+    ) -> Option<Box<ListNode>>
+    {
+        fn take_next<'a, I>(
+            mut lists: I,
+        ) -> Option<Box<ListNode>>
+        where
+            I: Iterator<Item = &'a mut Option<Box<ListNode>>>,
+        {
+            let mut best_list: &mut Option<Box<ListNode>> = &mut None;
+
+            while let Some(curr_list) = lists.next()
+            {
+                let Some(list_head) = curr_list
+                else {
+                    continue;
+                };
+
+                let Some(best_head) = best_list
+                else {
+                    best_list = curr_list;
+                    continue;
+                };
+
+                if list_head.val < best_head.val {
+                    best_list = curr_list;
+                }
+            }
+
+            let Some(mut best_head) = best_list.take()
+            else {
+                return None;
+            };
+
+            *best_list = best_head.next.take();
+            return Some(best_head);
+        }
+
+        let mut lists = [list1, list2];
+
+        let mut head = None;
+        let mut curr = &mut head;
+
+        while let Some(node) = take_next(lists.iter_mut())
+        {
+            *curr = Some(node);
+
+            let Some(node) = curr
+            else {
+                unreachable!()
+            };
+            curr = &mut node.next;
+        }
+
+        return head;
+    }
+}
